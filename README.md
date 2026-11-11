@@ -26,7 +26,8 @@ and 3.5 Mbps maximum video bitrate, with a VBV buffer of 1 s. 720p is
 The files in `public/` deploy as
 [static assets](https://developers.cloudflare.com/workers/static-assets/).
 A request for a file does not run the Worker, and static asset requests are
-free and not limited.
+free and not limited. `public/index.html` is the start page at
+<https://live.novage.workers.dev/>. It is in git; the stream folders are not.
 
 A request for a path that ends in `live.m3u8` runs the Worker
 ([src/index.ts](src/index.ts)). It reads the `vod.m3u8` in the same folder

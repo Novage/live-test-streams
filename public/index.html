@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Live Test Streams</title>
+    <meta
+      name="description"
+      content="Free looping live HLS test streams for P2P Media Loader."
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1d1f23;
+        --muted: #5b616b;
+        --border: #dfe2e6;
+        --code-bg: #f3f4f6;
+        --link: #0b62d6;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #15171a;
+          --fg: #e8eaed;
+          --muted: #a0a6ae;
+          --border: #2e3238;
+          --code-bg: #20242a;
+          --link: #7ab4ff;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          16px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 48px 16px 64px;
+      }
+      h1 {
+        font-size: 1.9rem;
+        line-height: 1.25;
+        margin: 0 0 12px;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin: 40px 0 12px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      a {
+        color: var(--link);
+      }
+      .lead {
+        font-size: 1.1rem;
+        color: var(--muted);
+      }
+      .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 24px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .links a {
+        display: inline-block;
+        padding: 8px 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .links a:hover {
+        border-color: var(--link);
+      }
+      .stream {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+      }
+      .stream h3 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+      .url {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0 0;
+      }
+      .url span {
+        flex: none;
+        width: 3.2em;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      code {
+        font:
+          0.9rem/1.4 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          monospace;
+        background: var(--code-bg);
+        border-radius: 6px;
+        padding: 6px 8px;
+        overflow-wrap: anywhere;
+        min-width: 0;
+      }
+      ul.facts {
+        margin: 12px 0 0;
+        padding-left: 20px;
+        color: var(--muted);
+      }
+      footer {
+        margin-top: 48px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Live test streams</h1>
+      <p class="lead">
+        This site gives free looping live HLS streams for tests of
+        <a href="https://github.com/Novage/p2p-media-loader">P2P Media Loader</a>,
+        a library that delivers video segments between viewers over WebRTC.
+      </p>
+      <ul class="links">
+        <li>
+          <a href="https://novage.com.ua/p2p-media-loader/demo">P2P Media Loader demo</a>
+        </li>
+        <li>
+          <a href="https://github.com/Novage/p2p-media-loader">P2P Media Loader on GitHub</a>
+        </li>
+        <li>
+          <a href="https://github.com/Novage/live-test-streams">Source of this site</a>
+        </li>
+      </ul>
+
+      <h2>Streams</h2>
+      <div class="stream">
+        <h3>Big Buck Bunny</h3>
+        <p class="url">
+          <span>Live</span>
+          <code>https://live.novage.workers.dev/bbb/live.m3u8</code>
+        </p>
+        <p class="url">
+          <span>VOD</span>
+          <code>https://live.novage.workers.dev/bbb/vod.m3u8</code>
+        </p>
+        <ul class="facts">
+          <li>1080p, 720p and 360p, H.264 and AAC in fMP4</li>
+          <li>6 s segments with aligned key frames in all renditions</li>
+          <li>60 s live window; the video loops every 10 min 30 s</li>
+          <li>CORS is open to all origins</li>
+        </ul>
+      </div>
+
+      <h2>How it works</h2>
+      <p>
+        A Cloudflare Worker makes the live playlists from a VOD stream. The
+        live position comes from the clock, so all viewers see the same live
+        edge, and no encoder runs.
+      </p>
+
+      <footer>
+        Big Buck Bunny © Blender Foundation,
+        <a href="https://peach.blender.org/">peach.blender.org</a>, licensed
+        under <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.
+      </footer>
+    </main>
+  </body>
+</html>

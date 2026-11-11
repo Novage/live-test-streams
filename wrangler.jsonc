@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // The Worker name is the first part of the URL:
+  // https://live.<account-subdomain>.workers.dev/
+  "name": "live",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    // Segments, init segments and VOD playlists. Made by scripts/encode.sh,
+    // not in git. A request for a file here does not run the Worker.
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

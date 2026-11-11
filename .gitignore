@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+.dev.vars*
+.DS_Store
+# Encoded streams are deployed from the local disk, not from git.
+public/*/
+# Source videos
+/source/

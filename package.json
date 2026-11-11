@@ -1,0 +1,26 @@
+{
+  "name": "live-test-streams",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Looping live HLS test streams made from VOD content, served by a Cloudflare Worker",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "encode": "scripts/encode.sh",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261110.1",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0",
+    "wrangler": "^4.160.0"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "fsevents": false,
+    "workerd": true
+  }
+}

@@ -5,7 +5,7 @@
 # Usage: scripts/encode.sh <input-video> <name>
 #
 # Environment:
-#   SEGMENT_DURATION  Segment duration in seconds (default 4).
+#   SEGMENT_DURATION  Segment duration in seconds (default 6).
 #   MAX_DURATION      Encode only this many seconds of the input (for tests).
 #
 # Output:
@@ -26,7 +26,7 @@ fi
 
 input=$1
 name=$2
-segment_duration=${SEGMENT_DURATION:-4}
+segment_duration=${SEGMENT_DURATION:-6}
 out="$(cd "$(dirname "$0")/.." && pwd)/public/$name"
 
 # Start and end time of a stream of the input, for example "v:0" or "a:0".
@@ -92,9 +92,14 @@ ffmpeg -hide_banner -y -i "$input" \
   `# loop, and hls.js gets a buffer gap and a stall at each loop start.` \
   -bf 0 \
   -force_key_frames "expr:gte(t,n_forced*${segment_duration})" -sc_threshold 0 \
-  -b:v:0 800k -maxrate:v:0 960k -bufsize:v:0 1600k \
-  -b:v:1 2800k -maxrate:v:1 3360k -bufsize:v:1 5600k \
-  -b:v:2 5000k -maxrate:v:2 6000k -bufsize:v:2 10000k \
+  `# hls.js starts with the highest variant whose BANDWIDTH (peak segment` \
+  `# bitrate) is at most 95% of its bandwidth estimate. With an estimate of` \
+  `# 5 Mbps, that is 4.75 Mbps, so 1080p must peak below it. bufsize equal` \
+  `# to maxrate limits a segment of D s to (1 + 1/D) x maxrate. For 1080p` \
+  `# with 6 s segments, that is 4.08 Mbps of video plus 128 kbps of audio.` \
+  -b:v:0 600k -maxrate:v:0 700k -bufsize:v:0 700k \
+  -b:v:1 1800k -maxrate:v:1 2100k -bufsize:v:1 2100k \
+  -b:v:2 3000k -maxrate:v:2 3500k -bufsize:v:2 3500k \
   -c:a aac -b:a 128k -ac 2 -ar 48000 \
   -f hls \
   -hls_time "$segment_duration" \

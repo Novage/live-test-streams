@@ -6,21 +6,19 @@ import {
   type LiveOptions,
   type VodMediaPlaylist,
 } from "./hls";
+import { EPOCH_MS, WINDOW_MS } from "./config";
 
 export interface Env {
   ASSETS: Fetcher;
 }
 
-/**
- * Loop 0 of every stream starts at this time. Do not change it: a change
- * moves the live position and the media sequence of all streams.
- */
-export const LIVE_OPTIONS: LiveOptions = {
-  epochMs: Date.UTC(2026, 0, 1),
-  // 60 s with 4 s segments. P2P needs a long window: peers can share only
-  // segments that are still in the playlist.
-  windowSize: 15,
-};
+function liveOptions(vod: VodMediaPlaylist): LiveOptions {
+  const segmentMs = vod.loopDurationMs / vod.segments.length;
+  return {
+    epochMs: EPOCH_MS,
+    windowSize: Math.max(1, Math.ceil(WINDOW_MS / segmentMs)),
+  };
+}
 
 const LIVE_SUFFIX = "/live.m3u8";
 
@@ -81,5 +79,5 @@ async function livePlaylist(
     vodCache.set(vodUrl.pathname, vod);
   }
 
-  return buildLiveMediaPlaylist(vod, nowMs, LIVE_OPTIONS);
+  return buildLiveMediaPlaylist(vod, nowMs, liveOptions(vod));
 }

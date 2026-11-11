@@ -12,13 +12,16 @@ from the clock.
 ## How it works
 
 `scripts/encode.sh` encodes a video into a VOD HLS stream (fMP4, 1080p,
-720p and 360p) in `public/<name>/`. All segments in all renditions are 4 s,
+720p and 360p) in `public/<name>/`. All segments in all renditions are 6 s,
 with a key frame at each segment boundary, so segment N starts at the same
 time in each rendition. P2P works best with equal segments.
 
 The multivariant playlist lists 1080p first. Players such as Safari start
-with the first variant. hls.js starts with it only if its `BANDWIDTH` is
-below the hls.js default estimate (5 Mbps), so hls.js starts at 720p.
+with the first variant. hls.js starts with the highest variant whose
+`BANDWIDTH` (peak segment bitrate) is at most 95% of its bandwidth estimate,
+often 5 Mbps. So the 1080p peak is kept below 4.75 Mbps: 3 Mbps average
+and 3.5 Mbps maximum video bitrate, with a VBV buffer of 1 s. 720p is
+1.8/2.1 Mbps and 360p is 0.6/0.7 Mbps.
 
 The files in `public/` deploy as
 [static assets](https://developers.cloudflare.com/workers/static-assets/).
@@ -32,7 +35,7 @@ and makes the live playlist from it ([src/hls.ts](src/hls.ts)):
 - Loop 0 starts at the epoch, 2026-01-01T00:00:00Z. Absolute segment *k* is
   VOD segment *k* mod *count* in loop ⌊*k* / *count*⌋.
 - A segment is in the playlist when its end time is in the past. The
-  playlist has the last 15 segments (60 s). P2P needs a long window: peers
+  playlist has the last 60 s (10 segments of 6 s). P2P needs a long window: peers
   can share only segments that are still in the playlist.
 - `EXT-X-DISCONTINUITY` is before the first segment of each loop, and
   `EXT-X-DISCONTINUITY-SEQUENCE` counts the loop starts before the first
@@ -94,7 +97,7 @@ stalls at each loop start:
 - It uses only the time where both video and audio exist, cut to whole
   segments. In the Big Buck Bunny source, the video starts 2 frames after
   the audio, and the audio ends 0.4 s before the video. So Big Buck Bunny
-  loops after 632 s, not 634.6 s.
+  loops after 630 s, not 634.6 s.
 - It trims both streams from the same start time in the filter graph and
   resets their timestamps to 0. With `-t` only, ffmpeg adds frames at the
   start of the video and makes an extra short segment.
@@ -128,7 +131,8 @@ details → Subdomain.
 ## Limits of the Workers free plan
 
 - 100,000 Worker requests per day. Only playlist requests run the Worker.
-  One viewer requests one media playlist each 4 s, about 21,600 requests per
-  day.
+  One viewer requests one media playlist each 6 s, about 14,400 requests per
+  day, so the free plan is enough for about 165 viewer-hours per day. This
+  is why the segments are 6 s and not 4 s.
 - 20,000 static asset files per Worker version, 25 MiB per file. Big Buck
-  Bunny (10 min 32 s) is about 480 files.
+  Bunny (10 min 30 s) is about 320 files.

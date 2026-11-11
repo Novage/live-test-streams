@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { WINDOW_MS } from "../src/config";
 import worker, { type Env } from "../src/index";
 
 const FILES: Record<string, string> = {
@@ -58,6 +59,13 @@ describe("worker", () => {
     expect(text).toContain("#EXT-X-MEDIA-SEQUENCE:");
     expect(text).toMatch(/\nseg_000[01]\.m4s\?loop=\d+\n/);
     expect(text).not.toContain("#EXT-X-ENDLIST");
+  });
+
+  it("makes the window as long as WINDOW_MS", async () => {
+    const text = await (await get("/bbb/360p/live.m3u8")).text();
+    const segments = text.split("\n").filter((l) => l.startsWith("seg_"));
+    // 4 s segments in the test playlist.
+    expect(segments).toHaveLength(Math.ceil(WINDOW_MS / 4000));
   });
 
   it("answers HEAD without a body", async () => {

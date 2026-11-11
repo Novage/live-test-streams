@@ -17,7 +17,9 @@ export interface Env {
  */
 export const LIVE_OPTIONS: LiveOptions = {
   epochMs: Date.UTC(2026, 0, 1),
-  windowSize: 10,
+  // 60 s with 4 s segments. P2P needs a long window: peers can share only
+  // segments that are still in the playlist.
+  windowSize: 15,
 };
 
 const LIVE_SUFFIX = "/live.m3u8";

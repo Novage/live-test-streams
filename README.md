@@ -11,10 +11,10 @@ from the clock.
 
 ## How it works
 
-`scripts/encode.sh` encodes a video into a VOD HLS stream (fMP4, 4 s
-segments, 1080p, 720p and 360p) in `public/<name>/`. All renditions have a
-key frame at each segment boundary, so segment N starts at the same time in
-each rendition.
+`scripts/encode.sh` encodes a video into a VOD HLS stream (fMP4, 1080p,
+720p and 360p) in `public/<name>/`. All segments in all renditions are 4 s,
+with a key frame at each segment boundary, so segment N starts at the same
+time in each rendition. P2P works best with equal segments.
 
 The multivariant playlist lists 1080p first. Players such as Safari start
 with the first variant. hls.js starts with it only if its `BANDWIDTH` is
@@ -32,7 +32,8 @@ and makes the live playlist from it ([src/hls.ts](src/hls.ts)):
 - Loop 0 starts at the epoch, 2026-01-01T00:00:00Z. Absolute segment *k* is
   VOD segment *k* mod *count* in loop ⌊*k* / *count*⌋.
 - A segment is in the playlist when its end time is in the past. The
-  playlist has the last 10 segments.
+  playlist has the last 15 segments (60 s). P2P needs a long window: peers
+  can share only segments that are still in the playlist.
 - `EXT-X-DISCONTINUITY` is before the first segment of each loop, and
   `EXT-X-DISCONTINUITY-SEQUENCE` counts the loop starts before the first
   segment.
@@ -84,16 +85,21 @@ For a quick test, encode only the start of a video:
 MAX_DURATION=30 scripts/encode.sh input.mp4 test
 ```
 
-The script does two things so that a loop joins the next one with no buffer
-gap. Without them, hls.js stalls at each loop start:
+The script does these things so that all segments have the same duration
+and a loop joins the next one with no buffer gap. Without them, hls.js
+stalls at each loop start:
 
 - It encodes without B-frames. With B-frames, the video of each loop starts
   2 frames after the audio.
-- It cuts the input where the shorter of video and audio ends, and pads the
-  audio with 0.1 s of silence. The live playlist takes the loop length from
-  the video, so the audio must not end before the video. In the Big Buck
-  Bunny source, the audio ends 0.4 s before the video, and after the cut
-  the video is still 2 frames longer.
+- It uses only the time where both video and audio exist, cut to whole
+  segments. In the Big Buck Bunny source, the video starts 2 frames after
+  the audio, and the audio ends 0.4 s before the video. So Big Buck Bunny
+  loops after 632 s, not 634.6 s.
+- It trims both streams from the same start time in the filter graph and
+  resets their timestamps to 0. With `-t` only, ffmpeg adds frames at the
+  start of the video and makes an extra short segment.
+- It pads the audio with 0.1 s of silence. The live playlist takes the loop
+  length from the video, so the audio must not end before the video.
 
 ## Run locally
 
@@ -125,4 +131,4 @@ details → Subdomain.
   One viewer requests one media playlist each 4 s, about 21,600 requests per
   day.
 - 20,000 static asset files per Worker version, 25 MiB per file. Big Buck
-  Bunny (10 min 34 s) is about 480 files.
+  Bunny (10 min 32 s) is about 480 files.
